@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for Layers-Demo Application
+Globals:
+    Function:
+        Timeout: 60
+
+Resources:
+#    DeploymentPermission:
+#        Type: "AWS::Lambda::LayerVersionPermission"
+#        Properties:
+#            Action: lambda:GetLayerVersion
+#            LayerVersionArn: !Ref SeleniumLayer
+
+    Lambdium:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: lambdium
+            Description: Layers App Deserialize Demo Function
+            Role: arn:aws:iam::825245177123:role/MyLamdaRole
+            CodeUri: ./src
+            Handler: app.handler
+            Runtime: python3.7
+            MemorySize: 1156
+#            Timeout: 20
+            Layers:
+#              - arn:aws:lambda:ap-northeast-1:825245177123:layer:SeleniumLambdaLayer:12
+                - !Ref SeleniumLayer
+            Environment:
+              Variables:
+                CLEAR_TMP: "true"
+
+
+    SeleniumLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: selenium-lambda-layer
+            Description: Lambda Layer with Selenium Module
+            ContentUri: ./selenium-lambda-layer
+            CompatibleRuntimes:
+                - python3.7
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Retain
+
+Outputs:
+    SeleniumLayerARN:
+        Value: !Ref SeleniumLayer
+        Description: SeleniumLambdaLayer ARN
+        Export:
+            Name: selenium-lambda-layer-arn
